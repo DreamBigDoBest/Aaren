@@ -80,9 +80,7 @@ function getStringTag(tag, input)
 
 function updateDatabase(tag, input)
 {
-    var DataSet = DataBaseAccess.getHtml();
-    DataSet = DataSet + getStringTag(tag, input);
-    DataBaseAccess.setHtml(DataSet);
+    DataBaseAccess.insertHtmlAtCursor("<div><br/></div>" + getStringTag(tag, input) + "<div><br/></div>");
 }
 
 
