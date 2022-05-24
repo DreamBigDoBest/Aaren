@@ -111,7 +111,7 @@ function updateParticipantsTable()
 
 /* Audio Input Instance */
 var mediaRecorder         = null;
-var delay                 = 10000;
+var delay                 = 500;
 var mediaProgressState    = 0;
 var inputAudioProcess     = 0;
 
@@ -210,10 +210,24 @@ function stopInputAudioProcess()
 }
 
 var audioPlayerTimestamp = 0;
+var tempAudioDataPlaceholder = [];
+var objectPlayer = new Audio();
+objectPlayer.addEventListener("ended", function(){
+    if(tempAudioDataPlaceholder.length > 0)
+    {
+        objectPlayer.src = "data:audio/wav;base64," + tempAudioDataPlaceholder.shift();
+        objectPlayer.load();
+        objectPlayer.play();
+    }
+});
+
 function audioPlayer()
 {
     var audioData = parseStringTag("audio", audioPlayerTimestamp);
-
+    
+    /* Temporary Not Support Group Voice Chat */
+    /* Assume Data Sequence Is Follow Order */
+    
     for(var index = 0; index < audioData.length; index++)
     {
         /* Query Timestamp Data */
@@ -233,7 +247,19 @@ function audioPlayer()
         if(audioData[index].includes("timestamp") == false)
         {
             /* Play Audio Data */
-            new Audio("data:audio/wav;base64," + audioData[index]).play();
+            tempAudioDataPlaceholder.push(audioData[index]);
+            // new Audio("data:audio/wav;base64," + audioData[index]).play();
+        }
+    }
+    
+    /* Test Code Required Evaluate */
+    if(tempAudioDataPlaceholder.length > 0)
+    {
+        if(objectPlayer.paused == true)
+        {
+            objectPlayer.src = "data:audio/wav;base64," + tempAudioDataPlaceholder.shift();
+            objectPlayer.load();
+            objectPlayer.play();
         }
     }
 }
@@ -291,7 +317,7 @@ function clearObsoletedHistory()
 }
 
 var clearObsoletedHistory_TimerTick = 600; /* Required 10-Minutes */
-var onlineStatusInform_TimerTick = 0;           /* Required 3-Sec  */
+var onlineStatusInform_TimerTick = 0;      /* Required 3-Sec  */
 function mainProcess()
 {
     /*================TimerTick Updates===================*/
