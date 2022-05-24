@@ -278,8 +278,8 @@ function clearObsoletedHistory()
     {
         if(rawData[index] != "")
         {
-            /* Only Keep 1-Minutes Historical Data */
-            if(timestampCurrent - parseFloat(rawData[index].split(TimestampSyntax)[1].split(BehindSyntax)[0]) < 1000 * 60)
+            /* Only Keep 30-Minutes Historical Data */
+            if(timestampCurrent - parseFloat(rawData[index].split(TimestampSyntax)[1].split(BehindSyntax)[0]) < 1000 * 60 * 30)
             {
                 validData = validData + ("<div>" + FrontSyntax + rawData[index] + "</div>");
             }
@@ -290,8 +290,8 @@ function clearObsoletedHistory()
     console.log("clearObsoletedHistory Triggered");
 }
 
-var clearObsoletedHistory_TimerTick = 20; /* Required 20-Sec */
-var onlineStatusInform_TimerTick = 0;     /* Required 3-Sec  */
+var clearObsoletedHistory_TimerTick = 600; /* Required 10-Minutes */
+var onlineStatusInform_TimerTick = 0;      /* Required 3-Sec  */
 function mainProcess()
 {
     /*================TimerTick Updates===================*/
