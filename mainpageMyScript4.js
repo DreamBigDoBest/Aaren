@@ -30,8 +30,8 @@ function parseStringTag(tag, timestamp)
                 switch(tag)
                 {
                     case "user":
-                        /* Read User History Less Than 5-Seconds */
-                        if((timestampOnline - parseFloat(innerData[0].split(TimestampSyntax)[1])) < 1000 * 5)
+                        /* Read User History Less Than 10-Seconds */
+                        if((timestampOnline - parseFloat(innerData[0].split(TimestampSyntax)[1])) < 1000 * 10)
                         {
                             if(outputData.includes(innerData[1]) == false)
                             {
@@ -111,7 +111,7 @@ function updateParticipantsTable()
 
 /* Audio Input Instance */
 var mediaRecorder         = null;
-var delay                 = 500;
+var delay                 = 10000;
 var mediaProgressState    = 0;
 var inputAudioProcess     = 0;
 
@@ -290,7 +290,7 @@ function clearObsoletedHistory()
     console.log("clearObsoletedHistory Triggered");
 }
 
-var clearObsoletedHistory_TimerTick = 600 * 10; /* Required 10-Minutes */
+var clearObsoletedHistory_TimerTick = 600; /* Required 10-Minutes */
 var onlineStatusInform_TimerTick = 0;           /* Required 3-Sec  */
 function mainProcess()
 {
@@ -302,13 +302,13 @@ function mainProcess()
     /*===================Main Process=====================*/
     if(onlineStatusInform_TimerTick <= 0)
     {
-        onlineStatusInform_TimerTick = 3 * 10;
+        onlineStatusInform_TimerTick = 3;
         onlineStatusInform();
     }
     
     if(clearObsoletedHistory_TimerTick <= 0)
     {
-        clearObsoletedHistory_TimerTick = 600 * 10;
+        clearObsoletedHistory_TimerTick = 600;
         clearObsoletedHistory();
     }
     
@@ -362,7 +362,7 @@ function initDatabase()
         }
             
         /* Initiate Main Process */
-        setInterval(mainProcess, 100);
+        setInterval(mainProcess, 1000);
         
         initializeCompleted = true;
     });
