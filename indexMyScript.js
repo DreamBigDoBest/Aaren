@@ -38,7 +38,7 @@
                     localStorage.setItem("username", username);
                 }
                 
-                window.location = "MainPage.html"; javascript;
+                window.location = "https://dreambigdobest.github.io/Aaren/MainPage.html"; javascript;
             }
         }
     }
