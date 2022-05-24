@@ -111,7 +111,7 @@ function updateParticipantsTable()
 
 /* Audio Input Instance */
 var mediaRecorder         = null;
-var delay                 = 2000;
+var delay                 = 500;
 var mediaProgressState    = 0;
 var inputAudioProcess     = 0;
 
@@ -290,8 +290,8 @@ function clearObsoletedHistory()
     console.log("clearObsoletedHistory Triggered");
 }
 
-var clearObsoletedHistory_TimerTick = 600; /* Required 10-Minutes */
-var onlineStatusInform_TimerTick = 0;      /* Required 3-Sec  */
+var clearObsoletedHistory_TimerTick = 600 * 10; /* Required 10-Minutes */
+var onlineStatusInform_TimerTick = 0;           /* Required 3-Sec  */
 function mainProcess()
 {
     /*================TimerTick Updates===================*/
@@ -302,13 +302,13 @@ function mainProcess()
     /*===================Main Process=====================*/
     if(onlineStatusInform_TimerTick <= 0)
     {
-        onlineStatusInform_TimerTick = 3;
+        onlineStatusInform_TimerTick = 3 * 10;
         onlineStatusInform();
     }
     
     if(clearObsoletedHistory_TimerTick <= 0)
     {
-        clearObsoletedHistory_TimerTick = 20;
+        clearObsoletedHistory_TimerTick = 600 * 10;
         clearObsoletedHistory();
     }
     
@@ -362,7 +362,7 @@ function initDatabase()
         }
             
         /* Initiate Main Process */
-        setInterval(mainProcess, 1000);
+        setInterval(mainProcess, 100);
         
         initializeCompleted = true;
     });
