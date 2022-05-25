@@ -33,7 +33,8 @@ function parseStringTag(tag, timestamp)
                         /* Read User History Less Than 10-Seconds */
                         if((timestampOnline - parseFloat(innerData[0].split(TimestampSyntax)[1])) < 1000 * 10)
                         {
-                            if(outputData.includes(innerData[1]) == false)
+                            if((outputData.includes(innerData[1]) == false) &&
+                               (innerData[1].includes("&nbsp") == false))
                             {
                                 outputData.push(innerData[1]);
                             }
@@ -110,25 +111,16 @@ function updateParticipantsTable()
 }
 
 /* Audio Input Instance */
-var mediaRecorder         = null;
-var delay                 = 500;
-var mediaProgressState    = 0;
-var inputAudioProcess     = 0;
+var mediaRecorder              = null;
+var audioChunkDuration         = 1000;
+var audioInputProgressState    = false;
 
-function startInputAudioProcess()
+function internalAudioInputProcess()
 {
-    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
-    {
-        console.log('getUserMedia Supported');
-        navigator.mediaDevices.getUserMedia ({audio: true, video: false})
-        .then(function(stream){
-            window.localStream = stream;
+    mediaRecorder = new MediaRecorder(window.localStream, {mimeType: 'audio/webm; codecs=opus'});
+    mediaRecorder.start();
             
-            mediaRecorder = new MediaRecorder(stream, {mimeType: 'audio/webm; codecs=opus'});
-            mediaRecorder.start();
-            mediaProgressState = 1;
-            
-            mediaRecorder.ondataavailable = function(e) {
+    mediaRecorder.ondataavailable = function(e) {
                 var blob = e.data;
                 var reader = new FileReader();
                 reader.readAsDataURL(blob);
@@ -137,21 +129,35 @@ function startInputAudioProcess()
                     audioDataPackaging(encodeURIComponent(data));
                 }
             }
+
+    setTimeout(function() {
+        if(mediaRecorder.state == "recording")
+        {
+            mediaRecorder.stop();
+        }
+      
+        if(audioInputProgressState == true)
+        {
+            internalAudioInputProcess();
+        }
+    }, audioChunkDuration);
+}
+
+function startInputAudioProcess()
+{
+    /* Query User Permission For Audio Input */
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+    {
+        console.log('getUserMedia Supported');
+        navigator.mediaDevices.getUserMedia ({audio: true, video: false})
+        .then(function(stream){
+        
+            /* Store the input stream */
+            window.localStream = stream;
+            audioInputProgressState = true;
             
-            inputAudioProcess = setInterval(function(){
-                if(mediaProgressState == 1)
-                {
-                   mediaRecorder.stop(); 
-                   mediaProgressState = 0;
-                }
-                else if(mediaProgressState == 0)
-                {
-                    mediaRecorder.start();
-                    mediaProgressState = 1;
-                
-                }
-            
-            }, delay);
+            /* Perform Internal Audio Handling */
+            internalAudioInputProcess();
         })
         .catch(function(err) {
             console.log('The Following getUserMedia error occurred: ' + err);
@@ -203,9 +209,8 @@ function stopAudioOnly(stream)
 
 function stopInputAudioProcess()
 {
-    clearInterval(inputAudioProcess);
     stopAudioOnly(window.localStream);
-    mediaProgressState = -1;
+    audioInputProgressState = false;
     mediaRecorder.stop();
 }
 
@@ -248,11 +253,10 @@ function audioPlayer()
         {
             /* Play Audio Data */
             tempAudioDataPlaceholder.push(audioData[index]);
-            // new Audio("data:audio/wav;base64," + audioData[index]).play();
         }
     }
     
-    /* Test Code Required Evaluate */
+    /* Initiate Audio Playback */
     if(tempAudioDataPlaceholder.length > 0)
     {
         if(objectPlayer.paused == true)
@@ -414,17 +418,4 @@ function getExampleRef()
     }
     
     return ref;
-}
-    
-function outputDebugger()
-{
-    /* Internal Used Debugger */
-    var rawData = [];
-    var totalLength = document.getElementsByClassName("CodeMirror-line").length
-    for(var index = 0; index < totalLength; index++)
-    {
-        rawData.push(document.getElementsByClassName("CodeMirror-line")[index].innerText);
-    }
-
-    console.log(rawData);
 }
