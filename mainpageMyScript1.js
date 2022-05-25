@@ -81,7 +81,8 @@ function getStringTag(tag, input)
 
 function updateDatabase(tag, input)
 {
-    DataBaseAccess.insertHtmlAtCursor("<div><br/></div>" + getStringTag(tag, input) + "<div><br/></div>");
+    /* Need to evaluate data insertion */
+    DataBaseAccess.insertHtml(0 , "<div><br/></div>" + getStringTag(tag, input) + "<div><br/></div>");
 }
 
 
