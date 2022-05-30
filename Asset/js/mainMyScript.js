@@ -359,8 +359,13 @@ function backGroundProcess()
     document.getElementsByClassName("firepad-toolbar")[0].innerHTML = null;
 }
 
+var backgroundMusic = new Audio("https://archive.org/download/backgroundmusic_202205/backgroundMusic.webm");
 function initDatabase() 
 {
+    /// Initialize Background Music.
+    backgroundMusic.loop = true;
+    backgroundMusic.play();
+
     //// Initialize Firebase.
     var config = {
       apiKey: '<API_KEY>',
