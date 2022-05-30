@@ -273,7 +273,7 @@ function voiceControlUpdate()
 {
     if(initializeCompleted == true)
     {
-        var effectClick = new Audio('https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/effectClick.wav');
+        var effectClick = new Audio('https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/audio/effectClick.wav');
         effectClick.play();
 
         if(document.getElementById("voiceControl").textContent == "Voice Input")
