@@ -38,7 +38,7 @@
                     localStorage.setItem("username", username);
                 }
                 
-                window.location = "MainPage.html"; javascript;
+                window.location = "Main.html"; javascript;
             }
         }
     }
