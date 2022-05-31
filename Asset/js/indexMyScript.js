@@ -16,6 +16,9 @@
     
     function pageAccess()
     {
+        // Click Sound Effect
+        new Audio('https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/audio/effectFastClick.mp3').play();
+        
         //document.write('<html><body><pre>The second html</pre></body></html>');
         //document.close();
         var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
@@ -38,7 +41,7 @@
                     localStorage.setItem("username", username);
                 }
                 
-                window.location = "Main.html"; javascript;
+                setTimeout(function(){window.location = "Main.html"; javascript;}, 800);
             }
         }
     }
