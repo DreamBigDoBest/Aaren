@@ -81,7 +81,7 @@ function getStringTag(tag, input)
 
 function updateDatabase(tag, input)
 {
-    /* Need to evaluate data insertion */
+    /* Data Insertion At Position-0 */
     DataBaseAccess.insertHtml(0 , "<div><br/></div>" + getStringTag(tag, input) + "<div><br/></div>");
 }
 
@@ -112,9 +112,8 @@ function updateParticipantsTable()
 }
 
 /* Audio Input Instance */
-var mediaRecorder              = null;
-var audioChunkDuration         = 1000;
-var audioInputProgressState    = false;
+var mediaRecorder = null;
+var audioInputProgress = false;
 
 function internalAudioInputProcess()
 {
@@ -130,18 +129,6 @@ function internalAudioInputProcess()
                     audioDataPackaging(encodeURIComponent(data));
                 }
             }
-
-    setTimeout(function() {
-        if(mediaRecorder.state == "recording")
-        {
-            mediaRecorder.stop();
-        }
-      
-        if(audioInputProgressState == true)
-        {
-            internalAudioInputProcess();
-        }
-    }, audioChunkDuration);
 }
 
 function startInputAudioProcess()
@@ -155,7 +142,6 @@ function startInputAudioProcess()
         
             /* Store the input stream */
             window.localStream = stream;
-            audioInputProgressState = true;
             
             /* Perform Internal Audio Handling */
             internalAudioInputProcess();
@@ -168,6 +154,9 @@ function startInputAudioProcess()
     {
         console.log('getUserMedia Not Supported On Your Browser !!!');
     }
+    
+    /* Update Input Progress State */
+    audioInputProgress = true;
 }
 
 function audioDataPackaging(data)
@@ -210,14 +199,20 @@ function stopAudioOnly(stream)
 
 function stopInputAudioProcess()
 {
-    stopAudioOnly(window.localStream);
-    audioInputProgressState = false;
     mediaRecorder.stop();
+    stopAudioOnly(window.localStream);
+    
+    /* Update Input Progress State */
+    audioInputProgress = false;
 }
 
+
+/* Audio Player Instance */
 var audioPlayerTimestamp = 0;
 var tempAudioDataPlaceholder = [];
 var objectPlayer = new Audio();
+
+/* Keep Continue Playing Until All Audio Within Placeholder Finished */
 objectPlayer.addEventListener("ended", function(){
     if(tempAudioDataPlaceholder.length > 0)
     {
@@ -231,9 +226,7 @@ function audioPlayer()
 {
     var audioData = parseStringTag("audio", audioPlayerTimestamp);
     
-    /* Temporary Not Support Group Voice Chat */
-    /* Assume Data Sequence Is Follow Order */
-    
+    /* Audio Data Sequence Shall Follow Line Order */
     for(var index = 0; index < audioData.length; index++)
     {
         /* Query Timestamp Data */
@@ -252,7 +245,7 @@ function audioPlayer()
         /* Query Audio data */
         if(audioData[index].includes("timestamp") == false)
         {
-            /* Play Audio Data */
+            /* Push Audio Data To Temporary Placeholder */
             tempAudioDataPlaceholder.push(audioData[index]);
         }
     }
@@ -269,23 +262,24 @@ function audioPlayer()
     }
 }
 
-function voiceControlUpdate()
+var effectStartInput = new Audio('https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/audio/effectStartInput.mp3');
+var effectEndInput = new Audio('https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/audio/effectEndInput.mp3');
+function voiceControlUpdate(param)
 {
     if(initializeCompleted == true)
     {
-        var effectClick = new Audio('https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/audio/effectClick.wav');
-        effectClick.play();
-
-        if(document.getElementById("voiceControl").textContent == "Voice Input")
+        if((param == "START") && (audioInputProgress == false))
         {
-            document.getElementById("voiceControl").textContent = "Voice Mute";
-            audioPlayerTimestamp = new Date().getTime();
-            startInputAudioProcess();
+            /* Start Audio Input Effect */
+            effectStartInput.play();
             
+            startInputAudioProcess();
         }
-        else
+        else if(param == "END")
         {
-            document.getElementById("voiceControl").textContent = "Voice Input";
+            /* End Audio Input Effect */
+            effectEndInput.play();
+            
             stopInputAudioProcess();
         }
     }
@@ -293,41 +287,19 @@ function voiceControlUpdate()
 
 function clearObsoletedHistory()
 {
-    var rawData = "";
-    var innerData = "";
-    var validData = "";
-    var timestampCurrent = new Date().getTime();
-    
-    /* Parsing Database Contents */
-    rawData = DataBaseAccess.getHtml();
-    rawData = rawData.replace(/<div>/g,'');
-    rawData = rawData.replace(/<\/div>/g,'');
-    rawData = rawData.replace(/<br\/>/g,'');
-    rawData = rawData.split(FrontSyntax);
-    
-    for(var index = 0; index < rawData.length; index++)
-    {
-        if(rawData[index] != "")
-        {
-            /* Only Keep 30-Minutes Historical Data */
-            if(timestampCurrent - parseFloat(rawData[index].split(TimestampSyntax)[1].split(BehindSyntax)[0]) < 1000 * 60 * 30)
-            {
-                validData = validData + ("<div>" + FrontSyntax + rawData[index] + "</div>");
-            }
-        }
-    }
-    
-    DataBaseAccess.setHtml(validData);
+    DataBaseAccess.richTextCodeMirror_.historicalDataCleanup();
     console.log("clearObsoletedHistory Triggered");
 }
 
-var clearObsoletedHistory_TimerTick = 600; /* Required 10-Minutes */
-var onlineStatusInform_TimerTick = 0;      /* Required 3-Sec  */
+var clearObsoletedHistory_TimerTick = 30;  /* Default 30-Sec , Required 30-Sec */
+var onlineStatusInform_TimerTick = 0;      /* Default  0-Sec , Required 3-Sec  */
+var playReceiverAudio_TimerTick = 1;       /* Default  1-Sec , Required 1-Sec  */
 function mainProcess()
 {
     /*================TimerTick Updates===================*/
     --onlineStatusInform_TimerTick;
     --clearObsoletedHistory_TimerTick;
+    --playReceiverAudio_TimerTick;
     /*====================================================*/
     
     /*===================Main Process=====================*/
@@ -339,12 +311,13 @@ function mainProcess()
     
     if(clearObsoletedHistory_TimerTick <= 0)
     {
-        clearObsoletedHistory_TimerTick = 600;
+        clearObsoletedHistory_TimerTick = 30;
         clearObsoletedHistory();
     }
     
-    if(document.getElementById("voiceControl").textContent == "Voice Mute")
+    if(playReceiverAudio_TimerTick <= 0)
     {
+        playReceiverAudio_TimerTick = 1;
         audioPlayer();
     }
     
@@ -352,21 +325,22 @@ function mainProcess()
     /*====================================================*/
 }
 
+var backgroundMusic = new Audio("https://archive.org/download/backgroundmusic_202205/backgroundMusic.webm");
 function backGroundProcess()
 {
     /* Run When Page Finished Loaded */
+    backgroundMusic.loop = true;
+    backgroundMusic.play();
+    
     initDatabase();
+    initInputKey();
     document.getElementsByClassName("firepad-toolbar")[0].innerHTML = null;
 }
 
-var backgroundMusic = new Audio("https://archive.org/download/backgroundmusic_202205/backgroundMusic.webm");
+
 function initDatabase() 
 {
-    /// Initialize Background Music.
-    backgroundMusic.loop = true;
-    backgroundMusic.play();
-
-    //// Initialize Firebase.
+    //// Initialize Firebase
     var config = {
       apiKey: '<API_KEY>',
       authDomain: "firepad-gh-tests.firebaseapp.com",
@@ -375,7 +349,7 @@ function initDatabase()
     firebase.initializeApp(config);
 
     //// Get Firebase Database reference.
-    var firepadRef = getExampleRef();
+    var firepadRef = getDatabaseRef();
 
     //// Create CodeMirror (with lineWrapping on).
     var codeMirror = CodeMirror(document.getElementById('firepad-container'), { lineWrapping: true });
@@ -386,8 +360,24 @@ function initDatabase()
 
     //// Share Access Ownership
     DataBaseAccess = firepad;
+    
+    //// Create Ad-Hoc Function For Database Cleanup
+    DataBaseAccess.richTextCodeMirror_.historicalDataCleanup = function(){
+        var t = this.codeMirror,
+            e = t.getCursor(),
+            r = t.getLine(e.line),
+            n = this.areLineSentinelCharacters_(r),
+            i = t.getLine(t.lineCount() - 1);
+        
+        /* Reached 50 Historical Data Line */
+        if(t.lineCount() > 50)
+        {
+            /* Clear Bottom Old Data */
+            t.replaceRange("", {line: t.lineCount() - 20, ch: 0}, {line: t.lineCount(), ch: 0}, "+input");
+        }
+    }
       
-    //// Initialize contents, Database Ready To Access
+    //// Initialize Contents When Database Ready To Access
     firepad.on('ready', function() {
         if (firepad.isHistoryEmpty()) {  
             /* Database Empty */
@@ -396,16 +386,17 @@ function initDatabase()
         {
             /* Database Not Empty */
         }
-            
+
+        /* Initialize All Global State */
+        audioPlayerTimestamp = new Date().getTime(); // Only Play Newly Received Audio
+        initializeCompleted = true; // Set Database Ready To Access State
+        
         /* Initiate Main Process */
         setInterval(mainProcess, 1000);
-        
-        initializeCompleted = true;
     });
 }
 
-
-function getExampleRef()
+function getDatabaseRef()
 {
     // Helper to get hash from end of URL or generate a random one.
     var ref = firebase.database().ref();
@@ -413,15 +404,45 @@ function getExampleRef()
     var hash = "-N2kk6d7vxxThsGc8-sM";
     
     if (hash) {
-      ref = ref.child(hash);
+        ref = ref.child(hash);
     } else {
-      ref = ref.push(); // generate unique location.
-      window.location = window.location + '#' + ref.key; // add it as a hash to the URL.
+        ref = ref.push(); // generate unique location.
+        window.location = window.location + '#' + ref.key; // add it as a hash to the URL.
     }
     
     if (typeof console !== 'undefined') {
-      console.log('Firebase data: ', ref.toString());
+        console.log('Firebase data: ', ref.toString());
     }
     
     return ref;
+}
+
+
+function initInputKey()
+{
+    window.onkeydown = function (e) {
+        var code = e.keyCode ? e.keyCode : e.which;
+            
+        switch(code)
+        {
+            case 32: /* Space */
+                voiceControlUpdate("START");
+                break;
+            default:
+                break;
+        }
+    }
+
+    window.onkeyup = function (e) {
+        var code = e.keyCode ? e.keyCode : e.which;
+            
+        switch(code)
+        {
+            case 32: /* Space */
+                voiceControlUpdate("END");
+                break;
+            default:
+                break;
+        }
+    }
 }
