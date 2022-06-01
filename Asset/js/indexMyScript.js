@@ -17,7 +17,7 @@
     function pageAccess()
     {
         // Click Sound Effect
-        new Audio('https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/audio/effectFastClick.mp3').play();
+        new Audio('https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/audio/effectLogin.mp3').play();
         
         //document.write('<html><body><pre>The second html</pre></body></html>');
         //document.close();
