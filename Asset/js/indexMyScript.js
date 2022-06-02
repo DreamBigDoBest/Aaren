@@ -41,7 +41,9 @@
                     localStorage.setItem("username", username);
                 }
                 
-                setTimeout(function(){window.location = "Main.html"; javascript;}, 800);
+                localStorage.setItem("login-token", "28021990");
+                
+                setTimeout(function(){window.location = "Main.html";}, 800);
             }
         }
     }
