@@ -199,11 +199,10 @@ function stopAudioOnly(stream)
 
 function stopInputAudioProcess()
 {
-    mediaRecorder.stop();
-    stopAudioOnly(window.localStream);
-    
     /* Update Input Progress State */
     audioInputProgress = false;
+    mediaRecorder.stop();
+    stopAudioOnly(window.localStream);
 }
 
 
@@ -264,23 +263,56 @@ function audioPlayer()
 
 var effectStartInput = new Audio('https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/audio/effectStartInput.mp3');
 var effectEndInput = new Audio('https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/audio/effectEndInput.mp3');
+var inputDetectionCount = 0;
+function inputContinousDetectionProcess()
+{
+    inputDetectionCount = inputDetectionCount - 1;
+                                                            
+    /* Every 1-Sec Verify Input Status */
+    if(inputDetectionCount <= 0)
+    {
+        inputDetectionCount = 0;
+        voiceControlUpdate("END");
+    }
+    else
+    {
+        setTimeout(inputContinousDetectionProcess, 1000);
+    }
+}
+
 function voiceControlUpdate(param)
 {
     if(initializeCompleted == true)
     {
+        /* Input Key Continuous Detection */
+        if(param == "START")
+        {
+            inputDetectionCount = 3;
+        }
+        else if(param == "END")
+        {
+            inputDetectionCount = 0;
+        }
+        
+        /* Trigger Audio Process Base On Input */
         if((param == "START") && (audioInputProgress == false))
         {
             /* Start Audio Input Effect */
             effectStartInput.play();
             
             startInputAudioProcess();
+            console.log("Start Input Audio Process...");
+            
+            /* Start Detect Continous Input */
+            inputContinousDetectionProcess();
         }
-        else if(param == "END")
+        else if((param == "END") && (audioInputProgress == true))
         {
             /* End Audio Input Effect */
             effectEndInput.play();
             
             stopInputAudioProcess();
+            console.log("Stop Input Audio Process...");
         }
     }
 }
@@ -345,6 +377,7 @@ function backGroundProcess()
     
     initDatabase();
     initInputKey();
+    document.getElementById("ButtonControl").textContent = "Connecting...";
     document.getElementsByClassName("firepad-toolbar")[0].innerHTML = null;
 }
 
@@ -404,6 +437,7 @@ function initDatabase()
         
         /* Initiate Main Process */
         setInterval(mainProcess, 1000);
+        document.getElementById("ButtonControl").textContent = "Connected ";
     });
 }
 
