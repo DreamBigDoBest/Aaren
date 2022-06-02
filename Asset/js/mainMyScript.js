@@ -328,6 +328,17 @@ function mainProcess()
 var backgroundMusic = new Audio("https://archive.org/download/backgroundmusic_202205/backgroundMusic.webm");
 function backGroundProcess()
 {
+    if(localStorage.getItem("login-token") == "28021990")
+    {
+        localStorage.setItem("login-token", "");
+    }
+    else
+    {
+        window.location.replace("index.html");
+        return;
+    }
+    
+    
     /* Run When Page Finished Loaded */
     backgroundMusic.loop = true;
     backgroundMusic.play();
