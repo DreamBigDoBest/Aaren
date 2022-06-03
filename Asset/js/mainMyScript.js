@@ -79,10 +79,15 @@ function getStringTag(tag, input)
     }
 }
 
+
+var updateDatabaseAllowState = true; /* Default: Allow */
 function updateDatabase(tag, input)
 {
-    /* Data Insertion At Position-0 */
-    DataBaseAccess.insertHtml(0 , "<div><br/></div>" + getStringTag(tag, input) + "<div><br/></div>");
+    if(updateDatabaseAllowState == true)
+    {
+        /* Data Insertion At Position-0 */
+        DataBaseAccess.insertHtml(0 , "<div><br/></div>" + getStringTag(tag, input) + "<div><br/></div>");
+    }
 }
 
 
@@ -219,6 +224,10 @@ objectPlayer.addEventListener("ended", function(){
         objectPlayer.load();
         objectPlayer.play();
     }
+    else
+    {
+        backgroundMusic.play();
+    }
 });
 
 function audioPlayer()
@@ -254,6 +263,7 @@ function audioPlayer()
     {
         if(objectPlayer.paused == true)
         {
+            backgroundMusic.pause();
             objectPlayer.src = "data:audio/wav;base64," + tempAudioDataPlaceholder.shift();
             objectPlayer.load();
             objectPlayer.play();
@@ -298,6 +308,7 @@ function voiceControlUpdate(param)
         if((param == "START") && (audioInputProgress == false))
         {
             /* Start Audio Input Effect */
+            backgroundMusic.pause();
             effectStartInput.play();
             
             startInputAudioProcess();
@@ -310,6 +321,7 @@ function voiceControlUpdate(param)
         {
             /* End Audio Input Effect */
             effectEndInput.play();
+            backgroundMusic.play();
             
             stopInputAudioProcess();
             console.log("Stop Input Audio Process...");
@@ -437,7 +449,7 @@ function initDatabase()
         
         /* Initiate Main Process */
         setInterval(mainProcess, 1000);
-        document.getElementById("ButtonControl").textContent = "Connected ";
+        document.getElementById("ButtonControl").textContent = "Connected";
     });
 }
 
@@ -485,6 +497,32 @@ function initInputKey()
         {
             case 32: /* Space */
                 voiceControlUpdate("END");
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+function adapterFirebaseEvent(param)
+{
+    if(initializeCompleted == true)
+    {
+        switch(param)
+        {
+            case "CONNECTED":
+                document.getElementById("ButtonControl").textContent = "Connected";
+                updateDatabaseAllowState = true;
+                break;
+            case "DISCONNECTED":
+                document.getElementById("ButtonControl").textContent = "Connecting...";
+                updateDatabaseAllowState = false;
+                break;
+            case "SENDLOCK":
+                updateDatabaseAllowState = false;
+                break;
+            case "SENDUNLOCK":
+                updateDatabaseAllowState = true;
                 break;
             default:
                 break;
