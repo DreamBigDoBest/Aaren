@@ -101,17 +101,30 @@ function updateParticipantsTable()
     var userOnline = parseStringTag("user", 0);
     
     /* Clear Table */
+    /*
     for (var index = 0; index < document.getElementsByTagName("table")[0].children[0].rows.length - 1; index++)
     {
         document.getElementsByTagName("table")[0].children[0].rows[index+1].children[0].innerText = ' ';
     }
+    */
+    participant_list[0].innerHTML = "";
     
     /* Update Table */
     for (var index = 0; index < userOnline.length ; index++)
     {
-        if(index < document.getElementsByTagName("table")[0].children[0].rows.length - 1)
+        if(userOnline[index] == "Aaren (Administrator)")
         {
-            document.getElementsByTagName("table")[0].children[0].rows[index+1].children[0].innerText = userOnline[index];
+            var user_info = admin_template.cloneNode(true);
+            user_info.children[1].children[0].firstChild.data = "Aaren";
+            user_info.children[1].children[0].children[1].textContent = "";
+            participant_list[0].appendChild(user_info);
+        }
+        else
+        {
+            var user_info = ranger_template.cloneNode(true);
+            user_info.children[1].children[0].firstChild.data = userOnline[index];
+            user_info.children[1].children[0].children[1].textContent = "";
+            participant_list[0].appendChild(user_info);
         }
     }
 }
@@ -141,7 +154,7 @@ function startInputAudioProcess()
     /* Query User Permission For Audio Input */
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
     {
-        console.log('getUserMedia Supported');
+        //console.log('getUserMedia Supported');
         navigator.mediaDevices.getUserMedia ({audio: true, video: false})
         .then(function(stream){
         
@@ -152,12 +165,12 @@ function startInputAudioProcess()
             internalAudioInputProcess();
         })
         .catch(function(err) {
-            console.log('The Following getUserMedia error occurred: ' + err);
+            //console.log('The Following getUserMedia error occurred: ' + err);
         });
     }
     else
     {
-        console.log('getUserMedia Not Supported On Your Browser !!!');
+        //console.log('getUserMedia Not Supported On Your Browser !!!');
     }
     
     /* Update Input Progress State */
@@ -312,7 +325,7 @@ function voiceControlUpdate(param)
             effectStartInput.play();
             
             startInputAudioProcess();
-            console.log("Start Input Audio Process...");
+            //console.log("Start Input Audio Process...");
             
             /* Start Detect Continous Input */
             inputContinousDetectionProcess();
@@ -324,7 +337,7 @@ function voiceControlUpdate(param)
             backgroundMusic.play();
             
             stopInputAudioProcess();
-            console.log("Stop Input Audio Process...");
+            //console.log("Stop Input Audio Process...");
         }
     }
 }
@@ -332,7 +345,7 @@ function voiceControlUpdate(param)
 function clearObsoletedHistory()
 {
     DataBaseAccess.richTextCodeMirror_.historicalDataCleanup();
-    console.log("clearObsoletedHistory Triggered");
+    //console.log("clearObsoletedHistory Triggered");
 }
 
 var clearObsoletedHistory_TimerTick = 30;  /* Default 30-Sec , Required 30-Sec */
@@ -369,9 +382,19 @@ function mainProcess()
     /*====================================================*/
 }
 
+var participant_list = document.getElementsByClassName("latest-comments-widget");
+var ranger_template  = participant_list[0].children[0].cloneNode(true);
+var admin_template   = participant_list[0].children[1].cloneNode(true);
 var backgroundMusic = new Audio("https://archive.org/download/backgroundmusic_202205/backgroundMusic.webm");
 function backGroundProcess()
 {
+    var hashChecker = 1805520027;
+    if(hashCode(window.location.href) != hashChecker)
+    {
+        window.location.replace("index.html");
+        return;
+    }
+    
     if(localStorage.getItem("login-token") == "28021990")
     {
         localStorage.setItem("login-token", "");
@@ -382,6 +405,8 @@ function backGroundProcess()
         return;
     }
     
+    /* Initialize Participants Table */
+    participant_list[0].innerHTML = "";
     
     /* Run When Page Finished Loaded */
     backgroundMusic.loop = true;
@@ -389,7 +414,7 @@ function backGroundProcess()
     
     initDatabase();
     initInputKey();
-    document.getElementById("ButtonControl").textContent = "Connecting...";
+    //document.getElementById("ButtonControl").textContent = "Connecting...";
     document.getElementsByClassName("firepad-toolbar")[0].innerHTML = null;
 }
 
@@ -449,7 +474,7 @@ function initDatabase()
         
         /* Initiate Main Process */
         setInterval(mainProcess, 1000);
-        document.getElementById("ButtonControl").textContent = "Connected";
+        //document.getElementById("ButtonControl").textContent = "Connected";
     });
 }
 
@@ -468,7 +493,7 @@ function getDatabaseRef()
     }
     
     if (typeof console !== 'undefined') {
-        console.log('Firebase data: ', ref.toString());
+        //console.log('Firebase data: ', ref.toString());
     }
     
     return ref;
@@ -511,11 +536,11 @@ function adapterFirebaseEvent(param)
         switch(param)
         {
             case "CONNECTED":
-                document.getElementById("ButtonControl").textContent = "Connected";
+                //document.getElementById("ButtonControl").textContent = "Connected";
                 updateDatabaseAllowState = true;
                 break;
             case "DISCONNECTED":
-                document.getElementById("ButtonControl").textContent = "Connecting...";
+                //document.getElementById("ButtonControl").textContent = "Connecting...";
                 updateDatabaseAllowState = false;
                 break;
             case "SENDLOCK":
@@ -528,4 +553,15 @@ function adapterFirebaseEvent(param)
                 break;
         }
     }
+}
+
+
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0, len = str.length; i < len; i++) {
+        let chr = str.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
 }
