@@ -177,37 +177,43 @@
 
         <div class="mySlides fade">
           <div class="numbertext"></div>
-          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/manual_control.jpg" style="width:100%; height:35vh">
+          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/manual_control.jpg" style="width:100%; height:46vh">
           <div class="text"></div>
         </div>
 
         <div class="mySlides fade">
           <div class="numbertext"></div>
-          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/autopilot.jpg" style="width:100%; height:35vh">
+          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/autopilot.jpg" style="width:100%; height:46vh">
           <div class="text"></div>
         </div>
 
         <div class="mySlides fade">
           <div class="numbertext"></div>
-          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/radar_detection.jpg" style="width:100%; height:35vh">
+          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/write_code.jpg" style="width:100%; height:46vh">
+          <div class="text"></div>
+        </div>
+
+        <div class="mySlides fade">
+          <div class="numbertext"></div>
+          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/radar_detection.jpg" style="width:100%; height:46vh">
           <div class="text"></div>
         </div>
         
         <div class="mySlides fade">
           <div class="numbertext"></div>
-          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/radar_example.jpg" style="width:100%; height:35vh">
+          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/radar_example.jpg" style="width:100%; height:46vh">
           <div class="text"></div>
         </div>
         
         <div class="mySlides fade">
           <div class="numbertext"></div>
-          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/javascript_intro1.jpg" style="width:100%; height:35vh">
+          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/javascript_intro1.jpg" style="width:100%; height:46vh">
           <div class="text"></div>
         </div>
         
         <div class="mySlides fade">
           <div class="numbertext"></div>
-          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/javascript_intro2.jpg" style="width:100%; height:35vh">
+          <img src="https://cdn.jsdelivr.net/gh/DreamBigDoBest/Aaren/Asset/images/javascript_intro2.jpg" style="width:100%; height:46vh">
           <div class="text"></div>
         </div>
 
@@ -220,6 +226,7 @@
             showSlides(slideIndex);
 
             function plusSlides(n) {
+              clearTimeout(slideTracker);
               showSlides(slideIndex += n);
             }
 
@@ -292,6 +299,29 @@
                 document.addEventListener('keyup', function (e) {
                     fnSendMsg(event);
                 });		 
+        </script>
+        <script>
+            var myIndex = 1;
+            var slideTracker = setTimeout(carousel, 10000); /* Initialize Auto Slide Scrolling Process */
+
+            function carousel() {
+                var i;
+                var x = document.getElementsByClassName("mySlides");
+
+                for (i = 0; i < x.length; i++) {
+                    x[i].style.display = "none";  
+                }
+                    
+                myIndex++;
+                if (myIndex > x.length)
+                {
+                    myIndex = 1;
+                }
+                
+                slideIndex = myIndex;
+                x[myIndex-1].style.display = "block";  
+                slideTracker = setTimeout(carousel, 10000); // Change Image Every 10 Seconds
+            }
         </script>
 </body>
 </html>
